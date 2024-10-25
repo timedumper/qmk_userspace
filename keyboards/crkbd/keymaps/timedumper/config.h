@@ -19,3 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #pragma once
+
+#define NO_DEBUG
+// #define USER_PRINT // this should keep uprint, but it doesn't
+
+// clang-format off
+
+#define LAYOUT_left_right(\
+    k0A, k0B, k0C, k0D, k0E, k0F,\
+    k1A, k1B, k1C, k1D, k1E, k1F, \
+    k2A, k2B, k2C, k2D, k2E, k2F, \
+    k3D, k3E, k3F, \
+    \
+    k4F, k4E, k4D, k4C, k4B, k4A, \
+    k5F, k5E, k5D, k5C, k5B, k5A, \
+    k6F, k6E, k6D, k6C, k6B, k6A, \
+    k7F, k7E, k7D\
+) { \
+	 {k0A, k0B, k0C, k0D, k0E, k0F}, \
+	 {k1A, k1B, k1C, k1D, k1E, k1F}, \
+	 {k2A, k2B, k2C, k2D, k2E, k2F}, \
+	 {KC_NO, KC_NO, KC_NO, k3D, k3E, k3F}, \
+	 {k4A, k4B, k4C, k4D, k4E, k4F}, \
+	 {k5A, k5B, k5C, k5D, k5E, k5F}, \
+	 {k6A, k6B, k6C, k6D, k6E, k6F}, \
+	 {KC_NO, KC_NO, KC_NO, k7D, k7E, k7F} \
+}
+
+// clang-format on
