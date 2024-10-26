@@ -212,7 +212,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [LEFT_MODS] = LAYOUT_left_right(
  //.----------------------------------------------------------------------------------------------------------------------.
-    XXXXXXX           , QK_BOOTLOADER     , XXXXXXX           , TAP_TERM_DECR     , TAP_TERM_INCR     , TAP_TERM_PRN      ,
+    XXXXXXX           , QK_BOOTLOADER     , QK_DEBUG_TOGGLE   , TAP_TERM_DECR     , TAP_TERM_INCR     , TAP_TERM_PRN      ,
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
     XXXXXXX           , KC_LGUI           , KC_LALT           , KC_LSFT           , KC_LCTL           , XXXXXXX           ,
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
@@ -291,3 +291,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 };
 // clang-format on
+
+uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case DGTS_CHRS_T(KC_F):
+            return 30;
+        default:
+            return QUICK_TAP_TERM;
+    }
+}

@@ -20,8 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#define NO_DEBUG
-// #define USER_PRINT // this should keep uprint, but it doesn't
+#define NO_DEBUG // space saving
+
+#define RETRO_TAPPING
+#define QUICK_TAP_TERM_PER_KEY
+#define DYNAMIC_TAPPING_TERM_INCREMENT 200
+
+// Not needed for now:
+// #define PERMISSIVE_HOLD
+// #define TAPPING_TERM_PER_KEY
+// #define ACTION_DEBUG
+
 
 // clang-format off
 
