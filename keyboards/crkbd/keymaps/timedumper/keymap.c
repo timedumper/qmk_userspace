@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum Layers {
     BASE,
+    LEFT_MODS,
+    RIGHT_MODS,
     IDE_SYM,
     SYM_IDE,
     DIGIT_CHARS,
     NAV,
-    LEFT_MODS,
-    RIGHT_MODS,
 };
 
 // layer-tap aliases
@@ -166,7 +166,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
     XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------'
-    XXXXXXX           , XXXXXXX           , XXXXXXX
+    KC_SPACE          , KC_BACKSPACE      , XXXXXXX
  //'----------------------------------------------------------'
 ),
 
@@ -298,5 +298,17 @@ uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t *record) {
             return 30;
         default:
             return QUICK_TAP_TERM;
+    }
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    uprintf("KC: 0x%04X, pressed: %u, ts: %5u, i: %u, cnt: %u, type: %u\n", keycode, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count, record->event.type);
+
+    switch (keycode) {
+        // case MY_FOO:
+        //     uprintf("Foo key is pressed");
+        //     return false;
+        default:
+            return true;
     }
 }
