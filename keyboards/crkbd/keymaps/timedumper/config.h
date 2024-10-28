@@ -23,14 +23,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define NO_DEBUG // space saving
 
 #define RETRO_TAPPING
-#define QUICK_TAP_TERM_PER_KEY
+#define TAPPING_TERM 200
 #define DYNAMIC_TAPPING_TERM_INCREMENT 200
+#define QUICK_TAP_TERM_PER_KEY
+#define TAPPING_TERM_PER_KEY
+
 
 // Not needed for now:
 // #define PERMISSIVE_HOLD
-// #define TAPPING_TERM_PER_KEY
 // #define ACTION_DEBUG
-
 
 // clang-format off
 
