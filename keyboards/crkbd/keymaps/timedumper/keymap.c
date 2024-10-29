@@ -57,6 +57,7 @@ enum tap_dances { TD_APP_SWITCH };
 
 // MARK: leader sequences
 
+#ifdef LEADER_ENABLE
 void leader_end_user(void) {
     if (leader_sequence_one_key(CK_APP_SWITCHER)) {
         // new window
@@ -69,6 +70,7 @@ void leader_end_user(void) {
         SEND_STRING(SS_LGUI(" "));
     }
 }
+#endif
 
 // MARK: layer definitions
 
