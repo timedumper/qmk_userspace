@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H // IWYU pragma: keep
 
+#include "features/app_switcher.h"
+#include "features/app_switcher_td.h"
+
 // MARK: layer and TD constants
 
 enum Layers {
@@ -55,132 +58,6 @@ enum tap_dances { TD_APP_SWITCH };
 #define TAP_TERM_PRN QK_DYNAMIC_TAPPING_TERM_PRINT
 #define TAP_TERM_INCR QK_DYNAMIC_TAPPING_TERM_UP
 #define TAP_TERM_DECR QK_DYNAMIC_TAPPING_TERM_DOWN
-
-// MARK: shit that shoudln't be here
-
-void debug_td_state(tap_dance_state_t *state, const char *what) {
-    uprintf("     %05u [%s] %s cnt=%d%s%s\n", timer_read(), what, state->pressed ? "PRESS" : "REL", state->count, state->finished ? " finished" : "", state->interrupted ? " interrupted" : "");
-}
-
-typedef struct {
-    uint8_t trigger_layer_idx;
-    bool    is_active : 1;
-    bool    gui_held : 1;
-} app_switcher_t;
-
-#define APP_SW_LOG_PREFIX "[app switcher] "
-
-void _app_switcher_next(app_switcher_t *this) {
-    if (!this->is_active) {
-        if (this->trigger_layer_idx == 255) {
-            uprintf(APP_SW_LOG_PREFIX "not activating app switcher because it was triggered from default layer!\n");
-            return;
-        } else {
-            uprintf(APP_SW_LOG_PREFIX "activated\n");
-        }
-        this->is_active = true;
-        if (!(get_mods() & MOD_MASK_GUI)) {
-            // neither GUI modifier pressed
-            register_code(KC_LGUI);
-            tap_code(KC_TAB);
-            this->gui_held = true;
-        }
-    } else {
-        uprintf(APP_SW_LOG_PREFIX "switch app\n");
-        tap_code(KC_TAB);
-    }
-}
-
-void _app_switcher_kill_app(app_switcher_t *this) {
-    uprintf(APP_SW_LOG_PREFIX "kill app\n");
-    if (this->is_active) {
-        tap_code(KC_Q);
-    }
-}
-
-void _app_switcher_finish(app_switcher_t *this) {
-    uprintf(APP_SW_LOG_PREFIX "deactivated\n");
-    if (this->is_active) {
-        this->is_active = false;
-        if (this->gui_held) {
-            this->gui_held = false;
-            unregister_code(KC_LGUI);
-        }
-    }
-}
-
-void _app_switcher_layer_state_set(app_switcher_t *this, layer_state_t state) {
-    uint8_t layer = get_highest_layer(default_layer_state | state);
-    if (!this->is_active) {
-        if (IS_LAYER_ON_STATE(default_layer_state, layer)) {
-            this->trigger_layer_idx = 255;
-        } else {
-            this->trigger_layer_idx = layer;
-        }
-    } else {
-        if (IS_LAYER_OFF_STATE(state, this->trigger_layer_idx)) {
-            _app_switcher_finish(this);
-        }
-    }
-}
-
-void _app_switcher_post_process_record(app_switcher_t *this, uint16_t keycode, keyrecord_t *record) {
-    if (this->is_active && !is_key_pressed(KC_LGUI)) {
-        uprintf(APP_SW_LOG_PREFIX "WARNING! App switcher was active, but GUI key was depressed somehow. Resetting state.\n");
-        this->is_active = false;
-        this->gui_held  = false;
-    }
-}
-
-typedef struct {
-    app_switcher_t *app_switcher;
-    bool            activated_on_first_press : 1;
-} td_tap_or_hold_state_t;
-
-void td_tap_or_hold_each(tap_dance_state_t *state, void *user_data) {
-    debug_td_state(state, "PRESS");
-    td_tap_or_hold_state_t *td_state = user_data;
-
-    if (!td_state->app_switcher->is_active && state->count == 1) {
-        // because we'll never activate the switcher from a hold we can safely
-        // do it right instead of release to expedite things
-        td_state->activated_on_first_press = true;
-        _app_switcher_next(td_state->app_switcher);
-    }
-}
-
-void td_tap_or_hold_each_release(tap_dance_state_t *state, void *user_data) {
-    debug_td_state(state, "RELEASE");
-    td_tap_or_hold_state_t *td_state = user_data;
-
-    if (!state->finished) {
-        // this is a tap which means normally we go to next app unless this was
-        // a first tap that activated the switcher
-        if (state->count > 1 || !td_state->activated_on_first_press) {
-            _app_switcher_next(td_state->app_switcher);
-        }
-    }
-}
-
-void td_tap_or_hold_finished(tap_dance_state_t *state, void *user_data) {
-    debug_td_state(state, "FINISH");
-    td_tap_or_hold_state_t *td_state = user_data;
-
-    if (state->pressed) {
-        // this is a hold which, normally, means sending a kill command
-        // however, if we activated the switcher as a part of this hold
-        // we should skip that
-        if (state->count > 1 || !td_state->activated_on_first_press) {
-            _app_switcher_kill_app(td_state->app_switcher);
-        }
-    }
-}
-
-void td_tap_or_hold_reset(tap_dance_state_t *state, void *user_data) {
-    debug_td_state(state, "RESET");
-    td_tap_or_hold_state_t *td_state   = user_data;
-    td_state->activated_on_first_press = false;
-}
 
 // MARK: layer definitions
 
@@ -446,18 +323,7 @@ app_switcher_t g_app_switcher = {.is_active = false, .gui_held = false};
 // MARK: tap dance definitions
 
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_APP_SWITCH] =
-        {
-            .fn.on_each_tap       = td_tap_or_hold_each,
-            .fn.on_each_release   = td_tap_or_hold_each_release,
-            .fn.on_dance_finished = td_tap_or_hold_finished,
-            .fn.on_reset          = td_tap_or_hold_reset,
-            .user_data =
-                &(td_tap_or_hold_state_t){
-                    .activated_on_first_press = false,
-                    .app_switcher             = &g_app_switcher,
-                },
-        },
+    [TD_APP_SWITCH] = APP_SWITCHER_TAP_DANCE_ACTION(&g_app_switcher)
 };
 
 // MARK: callbacks
@@ -481,12 +347,12 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    _app_switcher_layer_state_set(&g_app_switcher, state);
+    app_switcher_layer_state_set(&g_app_switcher, state);
     return state;
 }
 
 void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
-    _app_switcher_post_process_record(&g_app_switcher, keycode, record);
+    app_switcher_post_process_record(&g_app_switcher, keycode, record);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
