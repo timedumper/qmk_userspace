@@ -35,10 +35,6 @@ enum Layers {
 
 enum tap_dances { TD_APP_SWITCH };
 
-// layer-tap aliases
-#define SYM_IDE_T(code) LT(SYM_IDE, code)
-#define R_MODS_T(code) LT(RIGHT_MODS, code)
-#define DGTS_CHRS_T(code) LT(DIGIT_CHARS, code)
 // MARK: keycode aliases
 
 // layer-taps
@@ -58,6 +54,21 @@ enum tap_dances { TD_APP_SWITCH };
 #define TAP_TERM_PRN QK_DYNAMIC_TAPPING_TERM_PRINT
 #define TAP_TERM_INCR QK_DYNAMIC_TAPPING_TERM_UP
 #define TAP_TERM_DECR QK_DYNAMIC_TAPPING_TERM_DOWN
+
+// MARK: leader sequences
+
+void leader_end_user(void) {
+    if (leader_sequence_one_key(CK_APP_SWITCHER)) {
+        // new window
+        SEND_STRING(SS_LGUI("n"));
+    } else if (leader_sequence_two_keys(CK_APP_SWITCHER, CK_APP_SWITCHER)) {
+        // new window (shifted)
+        SEND_STRING(SS_LGUI(SS_LSFT("n")));
+    } else if (leader_sequence_one_key(QK_LEADER)) {
+        // open spotlight search
+        SEND_STRING(SS_LGUI(" "));
+    }
+}
 
 // MARK: layer definitions
 
@@ -207,7 +218,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  //.----------------------------------------------------------------------------------------------------------------------.
     XXXXXXX           , XXXXXXX           , CK_APP_SWITCHER   , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
-    KC_ESCAPE         , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
+    KC_ESCAPE         , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , QK_LEADER         ,
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
     KC_LSFT           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
  //'------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
@@ -323,7 +334,7 @@ app_switcher_t g_app_switcher = {.is_active = false, .gui_held = false};
 // MARK: tap dance definitions
 
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_APP_SWITCH] = APP_SWITCHER_TAP_DANCE_ACTION(&g_app_switcher)
+    [TD_APP_SWITCH] = APP_SWITCHER_TAP_DANCE_ACTION(&g_app_switcher),
 };
 
 // MARK: callbacks
