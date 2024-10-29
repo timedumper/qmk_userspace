@@ -42,11 +42,6 @@ enum tap_dances { TD_APP_SWITCH };
 #define LT_RMODS_ENTER LT(RIGHT_MODS, KC_ENTER)
 #define LT_DIGITS_F LT(DIGIT_CHARS, KC_F)
 
-// mod-taps
-#define MT_LALT_LEFT MT(KC_LALT, KC_LEFT)
-#define MT_LSFT_DOWN MT(KC_LSFT, KC_DOWN)
-#define MT_LCTL_RIGHT MT(KC_LCTL, KC_RIGHT)
-
 // custom behaviors
 #define CK_APP_SWITCHER TD(TD_APP_SWITCH)
 
@@ -74,12 +69,22 @@ void leader_end_user(void) {
 
 // MARK: combos
 
-const uint16_t PROGMEM test_combo1[] = {KC_A, KC_B, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_W_E[] = {KC_W, KC_E, COMBO_END};
+
 combo_t key_combos[] = {
-    COMBO(test_combo1, KC_ESC),
+    COMBO(CMB_KEYS_W_E, KC_LEFT),
 };
 
-// MARK: layer definitions
+bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
+    // for now, only allow combos on nav layer
+    if (layer_state_is(NAV)) {
+        return true;
+    }
+
+    return false;
+}
+
+// MARK: layer mappings
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {

@@ -32,6 +32,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LEADER_TIMEOUT 250
 #define LEADER_NO_TIMEOUT
 
+#define COMBO_STRICT_TIMER
+#define COMBO_ONLY_FROM_LAYER 0 // for simplicity we'll define them in qwerty terms (base layer)
+#define COMBO_SHOULD_TRIGGER // we're gonna only enable combos on certain layers
+
 // #define LEADER_DEBUG // adds ~500 bytes
 #define NO_ACTION_ONESHOT // removes ~600 bytes
 
