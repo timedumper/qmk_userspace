@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LEADER_PER_KEY_TIMING
 #define LEADER_TIMEOUT 250
 #define LEADER_NO_TIMEOUT
+#define LEADER_LOOKUP_LAYER 0
 
 #define COMBO_STRICT_TIMER
 #define COMBO_ONLY_FROM_LAYER 0 // for simplicity we'll define them in qwerty terms (base layer)

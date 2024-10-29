@@ -53,17 +53,23 @@ enum tap_dances { TD_APP_SWITCH };
 // MARK: leader sequences
 
 #ifdef LEADER_ENABLE
+
+#define LEAD_SEQ_1(kc, result) if (leader_sequence_one_key(kc)) { result; return; };
+#define LEAD_SEQ_2(kc1, kc2, result) if (leader_sequence_two_keys(kc1, kc2)) { result; return; };
+
 void leader_end_user(void) {
-    if (leader_sequence_one_key(CK_APP_SWITCHER)) {
-        // new window
-        SEND_STRING(SS_LGUI("n"));
-    } else if (leader_sequence_two_keys(CK_APP_SWITCHER, CK_APP_SWITCHER)) {
-        // new window (shifted)
-        SEND_STRING(SS_LGUI(SS_LSFT("n")));
-    } else if (leader_sequence_one_key(QK_LEADER)) {
-        // open spotlight search
-        SEND_STRING(SS_LGUI(" "));
-    }
+    //#region nav layer leader sequences
+
+    // new window
+    LEAD_SEQ_1(KC_W, SEND_STRING(SS_LGUI("n")))
+    // shifted new window
+    LEAD_SEQ_2(KC_W, KC_W, SEND_STRING(SS_LGUI(SS_LSFT("n"))))
+    // spotlight search
+    LEAD_SEQ_1(KC_G, SEND_STRING(SS_LGUI(" ")))
+    // shifted paste
+    LEAD_SEQ_1(KC_V, SEND_STRING(SS_LGUI(SS_LSFT("v"))))
+
+    //#endregion
 }
 #endif
 
@@ -234,7 +240,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
     KC_ESCAPE         , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , QK_LEADER         ,
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
-    KC_LSFT           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
+    KC_LSFT           , XXXXXXX           , G(KC_X)           , G(KC_C)           , G(KC_V)           , XXXXXXX           ,
  //'------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
                                                                 XXXXXXX           , XXXXXXX           , XXXXXXX           ,
  //                                                           `-----------------------------------------------------------'
