@@ -72,6 +72,13 @@ void leader_end_user(void) {
 }
 #endif
 
+// MARK: combos
+
+const uint16_t PROGMEM test_combo1[] = {KC_A, KC_B, COMBO_END};
+combo_t key_combos[] = {
+    COMBO(test_combo1, KC_ESC),
+};
+
 // MARK: layer definitions
 
 // clang-format off
@@ -372,3 +379,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     uprintf("%s 0x%04X, ts: %5u, i: %u, cnt: %u, type: %u\n", record->event.pressed ? "PRESS" : "RELEASE", keycode, record->event.time, record->tap.interrupted, record->tap.count, record->event.type);
     return true;
 }
+
+// MARK: space saving measures
+
+#ifndef MAGIC_ENABLE
+// redefining this function saves ~400 bytes
+uint16_t keycode_config(uint16_t keycode) {
+    return keycode;
+}
+
+// redefining this function saves ~200 bytes
+uint8_t mod_config(uint8_t mod) {
+    return mod;
+}
+#endif

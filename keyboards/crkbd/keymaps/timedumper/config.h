@@ -31,7 +31,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LEADER_PER_KEY_TIMING
 #define LEADER_TIMEOUT 250
 #define LEADER_NO_TIMEOUT
+
 // #define LEADER_DEBUG // adds ~500 bytes
+#define NO_ACTION_ONESHOT // removes ~600 bytes
 
 // clang-format off
 
