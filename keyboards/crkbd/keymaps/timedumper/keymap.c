@@ -33,7 +33,12 @@ enum Layers {
     NAV,
 };
 
-enum tap_dances { TD_APP_SWITCH };
+enum tap_dances {
+    TD_APP_SWITCH,
+    TD_SAVE_OR_OPEN,
+    TD_NXT_WND_OR_QUIT,
+    TD_RFRSH_OR_HARD_R
+};
 
 // MARK: keycode aliases
 
@@ -44,6 +49,9 @@ enum tap_dances { TD_APP_SWITCH };
 
 // custom behaviors
 #define CK_APP_SWITCHER TD(TD_APP_SWITCH)
+#define CK_SAVE_OR_OPEN TD(TD_SAVE_OR_OPEN)
+#define CK_NXT_WND_OR_QUIT TD(TD_NXT_WND_OR_QUIT)
+#define CK_RFRSH_OR_HARD_R TD(TD_RFRSH_OR_HARD_R)
 
 // QMK keycodes
 #define TAP_TERM_PRN QK_DYNAMIC_TAPPING_TERM_PRINT
@@ -54,31 +62,79 @@ enum tap_dances { TD_APP_SWITCH };
 
 #ifdef LEADER_ENABLE
 
-#define LEAD_SEQ_1(kc, result) if (leader_sequence_one_key(kc)) { result; return; };
-#define LEAD_SEQ_2(kc1, kc2, result) if (leader_sequence_two_keys(kc1, kc2)) { result; return; };
+#    define LEAD_SEQ_1(kc, result)         \
+        if (leader_sequence_one_key(kc)) { \
+            result;                        \
+            return;                        \
+        };
+#    define LEAD_SEQ_2(kc1, kc2, result)          \
+        if (leader_sequence_two_keys(kc1, kc2)) { \
+            result;                               \
+            return;                               \
+        };
 
 void leader_end_user(void) {
-    //#region nav layer leader sequences
+    // #region nav layer leader sequences
 
     // new window
     LEAD_SEQ_1(KC_W, SEND_STRING(SS_LGUI("n")))
     // shifted new window
     LEAD_SEQ_2(KC_W, KC_W, SEND_STRING(SS_LGUI(SS_LSFT("n"))))
+    // reopen tab
+    LEAD_SEQ_1(KC_T, SEND_STRING(SS_LGUI(SS_LSFT("t"))))
     // spotlight search
     LEAD_SEQ_1(KC_G, SEND_STRING(SS_LGUI(" ")))
     // shifted paste
     LEAD_SEQ_1(KC_V, SEND_STRING(SS_LGUI(SS_LSFT("v"))))
 
-    //#endregion
+    // #endregion
 }
 #endif
 
 // MARK: combos
 
+#define BASE_F LT_DIGITS_F
 const uint16_t PROGMEM CMB_KEYS_W_E[] = {KC_W, KC_E, COMBO_END};
-
+const uint16_t PROGMEM CMB_KEYS_E_R[] = {KC_E, KC_R, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_W_E_R[] = {KC_W, KC_E, KC_R, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_A_R[] = {KC_A, KC_R, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_A_F[] = {KC_A, BASE_F, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_A_V[] = {KC_A, KC_V, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_F_W[] = {BASE_F, KC_W, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_F_Q[] = {BASE_F, KC_Q, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_A_T[] = {KC_A, KC_T, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_S_D[] = {KC_S, KC_D, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_D_F[] = {KC_D, BASE_F, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_Z_F[] = {KC_Z, BASE_F, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_C_V[] = {KC_C, KC_V, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_X_C_V[] = {KC_X, KC_C, KC_V, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_S_D_F[] = {KC_S, KC_D, BASE_F, COMBO_END};
+#undef BASE_F
 combo_t key_combos[] = {
+    // cursor left/right (for single handed use, like fast forwarding youtube)
     COMBO(CMB_KEYS_W_E, KC_LEFT),
+    COMBO(CMB_KEYS_E_R, KC_LEFT),
+    // expose all windows
+    COMBO(CMB_KEYS_F_W, LCTL(KC_UP)),
+    // expose only current app's windows
+    COMBO(CMB_KEYS_F_Q, LCTL(KC_DOWN)),
+    // close window/tab
+    COMBO(CMB_KEYS_A_T, G(KC_W)),
+    // place window with Phoenix window manager
+    COMBO(CMB_KEYS_S_D, KC_F16), // left
+    COMBO(CMB_KEYS_D_F, KC_F18), // right
+    COMBO(CMB_KEYS_S_D_F, KC_F17), // center
+    // media controls
+    COMBO(CMB_KEYS_W_E_R, KC_MEDIA_PLAY_PAUSE),
+    COMBO(CMB_KEYS_A_R, KC_AUDIO_VOL_UP),
+    COMBO(CMB_KEYS_A_F, KC_AUDIO_MUTE),
+    COMBO(CMB_KEYS_A_V, KC_AUDIO_VOL_DOWN),
+    // redo
+    COMBO(CMB_KEYS_Z_F, G(S(KC_Z))),
+    // select all
+    COMBO(CMB_KEYS_C_V, G(KC_A)),
+    // take screenshot
+    COMBO(CMB_KEYS_X_C_V, G(S(KC_4))),
 };
 
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
@@ -235,15 +291,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 */
 
   [NAV] = LAYOUT_left_right(
- //.----------------------------------------------------------------------------------------------------------------------.
-    XXXXXXX           , XXXXXXX           , CK_APP_SWITCHER   , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
- //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
-    KC_ESCAPE         , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , QK_LEADER         ,
- //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
-    KC_LSFT           , XXXXXXX           , G(KC_X)           , G(KC_C)           , G(KC_V)           , XXXXXXX           ,
- //'------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
-                                                                XXXXXXX           , XXXXXXX           , XXXXXXX           ,
- //                                                           `-----------------------------------------------------------'
+ //.-----------------------------------------------------------------------------------------------------------------------.
+    XXXXXXX           , CK_NXT_WND_OR_QUIT, CK_APP_SWITCHER    , XXXXXXX           , CK_RFRSH_OR_HARD_R, G(KC_T)           ,
+ //|------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
+    KC_ESCAPE         , XXXXXXX           , CK_SAVE_OR_OPEN    , XXXXXXX           , XXXXXXX           , QK_LEADER         ,
+ //|------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
+    KC_LSFT           , G(KC_Z)           , G(KC_X)            , G(KC_C)           , G(KC_V)           , XXXXXXX           ,
+ //'------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
+                                                                 XXXXXXX           , XXXXXXX           , XXXXXXX           ,
+ //                                                            `-----------------------------------------------------------'
 
  //,----------------------------------------------------------------------------------------------------------------------.
     A(KC_LEFT)        , A(KC_RIGHT)       , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
@@ -355,6 +411,9 @@ app_switcher_t g_app_switcher = {.is_active = false, .gui_held = false};
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_APP_SWITCH] = APP_SWITCHER_TAP_DANCE_ACTION(&g_app_switcher),
+    [TD_SAVE_OR_OPEN] = TAP_DANCE_N_TAP_HOLD(G(KC_S), G(KC_O)),
+    [TD_NXT_WND_OR_QUIT] = TAP_DANCE_N_TAP_HOLD(G(KC_GRAVE), G(KC_Q)),
+    [TD_RFRSH_OR_HARD_R] = TAP_DANCE_N_TAP_HOLD(G(KC_R), G(S(KC_R))),
 };
 
 // MARK: callbacks
@@ -372,6 +431,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case CK_APP_SWITCHER:
             return 600;
+        case CK_SAVE_OR_OPEN:
+            return 400;
         default:
             return TAPPING_TERM;
     }

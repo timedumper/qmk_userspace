@@ -7,6 +7,8 @@ DECL(_td_tap_or_hold_each)
 DECL(_td_tap_or_hold_each_release)
 DECL(_td_tap_or_hold_finished)
 DECL(_td_tap_or_hold_reset)
+DECL(_td_n_tap_or_hold_each_release)
+DECL(_td_n_tap_or_hold_finished)
 #undef DECL
 
 typedef struct {
@@ -24,5 +26,21 @@ typedef struct {
             &(td_tap_or_hold_state_t){ \
                 .activated_on_first_press = false, \
                 .app_switcher             = switcher_ptr, \
+            }, \
+    })
+
+typedef struct {
+    uint16_t tap_code;
+    uint16_t hold_code;
+} td_n_tap_hold_state_t;
+
+#define TAP_DANCE_N_TAP_HOLD(tap_kc, hold_kc) (\
+    (tap_dance_action_t){ \
+        .fn.on_each_release   = _td_n_tap_or_hold_each_release, \
+        .fn.on_dance_finished = _td_n_tap_or_hold_finished, \
+        .user_data = \
+            &(td_n_tap_hold_state_t){ \
+                .tap_code = tap_kc, \
+                .hold_code = hold_kc, \
             }, \
     })

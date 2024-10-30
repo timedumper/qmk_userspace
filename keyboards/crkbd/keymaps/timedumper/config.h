@@ -38,6 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define COMBO_SHOULD_TRIGGER // we're gonna only enable combos on certain layers
 
 // #define LEADER_DEBUG // adds ~500 bytes
+// #define TAP_DANCE_DEBUG // adds ~300 bytes
 #define NO_ACTION_ONESHOT // removes ~600 bytes
 
 // clang-format off
