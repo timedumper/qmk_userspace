@@ -7,6 +7,7 @@ SWAP_HANDS_ENABLE = no      # Enable one-hand typing
 TAP_DANCE_ENABLE = yes
 LEADER_ENABLE = yes
 COMBO_ENABLE = yes
+REPEAT_KEY_ENABLE = yes
 
 DYNAMIC_TAPPING_TERM_ENABLE = yes # warning: this disables per-key tapping term
 

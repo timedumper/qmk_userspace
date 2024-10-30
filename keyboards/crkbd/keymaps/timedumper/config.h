@@ -37,9 +37,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define COMBO_ONLY_FROM_LAYER 0 // for simplicity we'll define them in qwerty terms (base layer)
 #define COMBO_SHOULD_TRIGGER // we're gonna only enable combos on certain layers
 
-// #define LEADER_DEBUG // adds ~500 bytes
-// #define TAP_DANCE_DEBUG // adds ~300 bytes
-#define NO_ACTION_ONESHOT // removes ~600 bytes
+// #define LEADER_DEBUG // ~500 bytes
+// #define TAP_DANCE_DEBUG // ~300 bytes
+#define NO_ACTION_ONESHOT // ~600 bytes
+#define NO_ALT_REPEAT_KEY // ~360 bytes (when repeat key is enabled)
 
 // clang-format off
 
