@@ -57,6 +57,14 @@ void app_switcher_layer_state_set(app_switcher_t *this, layer_state_t state) {
 }
 
 void app_switcher_post_process_record(app_switcher_t *this, uint16_t keycode, keyrecord_t *record) {
+
+    if (record->event.pressed && keycode == KC_ESC) {
+        // pressing ESC would hide the task switcher on Mac OS, so we need to sync
+        // this with our state (and release held modifier key, i. e. Cmd)
+        app_switcher_finish(this);
+        return;
+    }
+
     if (this->is_active && !is_key_pressed(KC_LGUI)) {
         uprintf(APP_SW_LOG_PREFIX "WARNING! App switcher was active, but GUI key was depressed somehow. Resetting state.\n");
         this->is_active = false;
