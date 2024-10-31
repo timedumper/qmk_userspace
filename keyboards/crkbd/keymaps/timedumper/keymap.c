@@ -25,12 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum Layers {
     BASE,
-    LEFT_MODS,
-    RIGHT_MODS,
     IDE_SYM,
     SYM_IDE,
     DIGIT_CHARS,
     NAV,
+    LEFT_MODS,
+    RIGHT_MODS,
 };
 
 enum tap_dances {
@@ -38,7 +38,7 @@ enum tap_dances {
     TD_SAVE_OR_OPEN,
     TD_NXT_WND_OR_QUIT,
     TD_RFRSH_OR_HARD_R,
-    TD_FIND_OR_REPLACE
+    TD_FIND_OR_REPLACE,
 };
 
 // MARK: keycode aliases
@@ -96,22 +96,36 @@ void leader_end_user(void) {
 // MARK: combos
 
 #define BASE_F LT_DIGITS_F
-const uint16_t PROGMEM CMB_KEYS_W_E[] = {KC_W, KC_E, COMBO_END};
-const uint16_t PROGMEM CMB_KEYS_E_R[] = {KC_E, KC_R, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_W_E[]   = {KC_W, KC_E, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_E_R[]   = {KC_E, KC_R, COMBO_END};
 const uint16_t PROGMEM CMB_KEYS_W_E_R[] = {KC_W, KC_E, KC_R, COMBO_END};
+
 const uint16_t PROGMEM CMB_KEYS_A_R[] = {KC_A, KC_R, COMBO_END};
 const uint16_t PROGMEM CMB_KEYS_A_F[] = {KC_A, BASE_F, COMBO_END};
 const uint16_t PROGMEM CMB_KEYS_A_V[] = {KC_A, KC_V, COMBO_END};
+
+const uint16_t PROGMEM CMB_KEYS_A_E[] = {KC_A, KC_E, COMBO_END};
+
 const uint16_t PROGMEM CMB_KEYS_F_W[] = {BASE_F, KC_W, COMBO_END};
 const uint16_t PROGMEM CMB_KEYS_F_Q[] = {BASE_F, KC_Q, COMBO_END};
+
 const uint16_t PROGMEM CMB_KEYS_A_T[] = {KC_A, KC_T, COMBO_END};
-const uint16_t PROGMEM CMB_KEYS_S_D[] = {KC_S, KC_D, COMBO_END};
-const uint16_t PROGMEM CMB_KEYS_D_F[] = {KC_D, BASE_F, COMBO_END};
-const uint16_t PROGMEM CMB_KEYS_Z_F[] = {KC_Z, BASE_F, COMBO_END};
-const uint16_t PROGMEM CMB_KEYS_C_V[] = {KC_C, KC_V, COMBO_END};
-const uint16_t PROGMEM CMB_KEYS_X_C_V[] = {KC_X, KC_C, KC_V, COMBO_END};
+
+const uint16_t PROGMEM CMB_KEYS_S_D[]   = {KC_S, KC_D, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_D_F[]   = {KC_D, BASE_F, COMBO_END};
 const uint16_t PROGMEM CMB_KEYS_S_D_F[] = {KC_S, KC_D, BASE_F, COMBO_END};
+
+const uint16_t PROGMEM CMB_KEYS_S_E[] = {KC_S, KC_E, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_E_F[] = {KC_E, BASE_F, COMBO_END};
+const uint16_t PROGMEM CMB_KEYS_S_F[] = {KC_S, BASE_F, COMBO_END};
+
+const uint16_t PROGMEM CMB_KEYS_Z_F[] = {KC_Z, BASE_F, COMBO_END};
+
+const uint16_t PROGMEM CMB_KEYS_C_V[] = {KC_C, KC_V, COMBO_END};
+
+const uint16_t PROGMEM CMB_KEYS_X_C_V[] = {KC_X, KC_C, KC_V, COMBO_END};
 #undef BASE_F
+
 combo_t key_combos[] = {
     // cursor left/right (for single handed use, like fast forwarding youtube)
     COMBO(CMB_KEYS_W_E, KC_LEFT),
@@ -123,8 +137,8 @@ combo_t key_combos[] = {
     // close window/tab
     COMBO(CMB_KEYS_A_T, G(KC_W)),
     // place window with Phoenix window manager
-    COMBO(CMB_KEYS_S_D, KC_F16), // left
-    COMBO(CMB_KEYS_D_F, KC_F18), // right
+    COMBO(CMB_KEYS_S_D, KC_F16),   // left
+    COMBO(CMB_KEYS_D_F, KC_F18),   // right
     COMBO(CMB_KEYS_S_D_F, KC_F17), // center
     // media controls
     COMBO(CMB_KEYS_W_E_R, KC_MEDIA_PLAY_PAUSE),
@@ -137,11 +151,26 @@ combo_t key_combos[] = {
     COMBO(CMB_KEYS_C_V, G(KC_A)),
     // take screenshot
     COMBO(CMB_KEYS_X_C_V, G(S(KC_4))),
+    // zoom out/in/reset
+    COMBO(CMB_KEYS_S_E, G(KC_MINUS)),
+    COMBO(CMB_KEYS_E_F, G(KC_EQUAL)),
+    COMBO(CMB_KEYS_S_F, G(KC_KP_0)),
+    // page down
+    COMBO(CMB_KEYS_A_E, KC_PAGE_UP),
 };
 
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
-    // for now, only allow combos on nav layer
-    if (layer_state_is(NAV)) {
+    unsigned int num_active_layers =
+#if defined(LAYER_STATE_8BIT)
+        bitpop(layer_state);
+#elif defined(LAYER_STATE_16BIT)
+        bitpop16(layer_state);
+#else
+        bitpop32(layer_state);
+#endif
+
+    // for now, only allow combos on nav layer *IF* other layers are not enabled
+    if (layer_state_is(NAV) && num_active_layers == 1) {
         return true;
     }
 
@@ -294,13 +323,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [NAV] = LAYOUT_left_right(
  //.-----------------------------------------------------------------------------------------------------------------------.
-    XXXXXXX           , CK_NXT_WND_OR_QUIT, CK_APP_SWITCHER    , XXXXXXX           , CK_RFRSH_OR_HARD_R, G(KC_T)           ,
+    XXXXXXX           , CK_NXT_WND_OR_QUIT, CK_APP_SWITCHER    , KC_PAGE_DOWN      , CK_RFRSH_OR_HARD_R, G(KC_T)           ,
  //|------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
-    KC_ESCAPE         , XXXXXXX           , CK_SAVE_OR_OPEN    , QK_REPEAT_KEY     , CK_FIND_OR_REPLACE, QK_LEADER         ,
+    KC_ESCAPE         , QK_REPEAT_KEY     , CK_SAVE_OR_OPEN    , KC_DEL            , CK_FIND_OR_REPLACE, QK_LEADER         ,
  //|------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
     KC_LSFT           , G(KC_Z)           , G(KC_X)            , G(KC_C)           , G(KC_V)           , XXXXXXX           ,
  //'------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
-                                                                 XXXXXXX           , XXXXXXX           , XXXXXXX           ,
+                                                                 MO(LEFT_MODS)     , XXXXXXX           , XXXXXXX           ,
  //                                                            `-----------------------------------------------------------'
 
  //,----------------------------------------------------------------------------------------------------------------------.
@@ -331,7 +360,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  //|------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
     XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           , XXXXXXX           ,
  //'------------------+-------------------+-------------------+-------------------+-------------------+-------------------|
-                                                                XXXXXXX           , XXXXXXX           , XXXXXXX           ,
+                                                                XXXXXXX           , MO(NAV)           , XXXXXXX           ,
  //                                                           `-----------------------------------------------------------'
 
  //,----------------------------------------------------------------------------------------------------------------------.
@@ -411,13 +440,15 @@ app_switcher_t g_app_switcher = {.is_active = false, .gui_held = false};
 
 // MARK: tap dance definitions
 
+// clang-format off
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_APP_SWITCH] = APP_SWITCHER_TAP_DANCE_ACTION(&g_app_switcher),
-    [TD_SAVE_OR_OPEN] = TAP_DANCE_N_TAP_HOLD(G(KC_S), G(KC_O)),
+    [TD_APP_SWITCH]      = APP_SWITCHER_TAP_DANCE_ACTION(&g_app_switcher),
+    [TD_SAVE_OR_OPEN]    = TAP_DANCE_N_TAP_HOLD(G(KC_S), G(KC_O)),
     [TD_NXT_WND_OR_QUIT] = TAP_DANCE_N_TAP_HOLD(G(KC_GRAVE), G(KC_Q)),
     [TD_RFRSH_OR_HARD_R] = TAP_DANCE_N_TAP_HOLD(G(KC_R), G(S(KC_R))),
-    [TD_FIND_OR_REPLACE] = TAP_DANCE_FULL_DOUBLE(G(KC_F), G(A(KC_F)), G(S(KC_F)), G(A(S(KC_F))))
+    [TD_FIND_OR_REPLACE] = TAP_DANCE_FULL_DOUBLE(G(KC_F), G(A(KC_F)), G(S(KC_F)), G(A(S(KC_F)))),
 };
+// clang-format on
 
 // MARK: callbacks
 
