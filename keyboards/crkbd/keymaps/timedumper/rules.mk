@@ -14,6 +14,9 @@ DYNAMIC_TAPPING_TERM_ENABLE = yes # warning: this disables per-key tapping term
 SRC += features/app_switcher.c
 SRC += features/app_switcher_td.c
 
+SRC += oled/oled.c
+SRC += utils.c
+
 # Space saving measures
 # RGBLIGHT_ENABLE = no # saves ~3700 bytes
 SPACE_CADET_ENABLE = no # ~340 bytes

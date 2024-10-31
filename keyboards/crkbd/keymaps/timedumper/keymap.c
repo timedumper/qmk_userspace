@@ -20,18 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "features/app_switcher.h"
 #include "features/app_switcher_td.h"
+#include "definitions.h"
+#include "utils.h"
 
-// MARK: layer and TD constants
-
-enum Layers {
-    BASE,
-    IDE_SYM,
-    SYM_IDE,
-    DIGIT_CHARS,
-    NAV,
-    LEFT_MODS,
-    RIGHT_MODS,
-};
+// MARK: TD constants
 
 enum tap_dances {
     TD_APP_SWITCH,
@@ -160,17 +152,8 @@ combo_t key_combos[] = {
 };
 
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
-    unsigned int num_active_layers =
-#if defined(LAYER_STATE_8BIT)
-        bitpop(layer_state);
-#elif defined(LAYER_STATE_16BIT)
-        bitpop16(layer_state);
-#else
-        bitpop32(layer_state);
-#endif
-
     // for now, only allow combos on nav layer *IF* other layers are not enabled
-    if (layer_state_is(NAV) && num_active_layers == 1) {
+    if (layer_state_is(NAV) && num_active_layers(layer_state) == 1) {
         return true;
     }
 
