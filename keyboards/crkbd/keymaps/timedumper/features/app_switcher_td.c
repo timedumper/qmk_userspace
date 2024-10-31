@@ -9,6 +9,7 @@ void _debug_td_state(tap_dance_state_t *state, uint8_t what);
 
 #define LOG_APP_SW (1 << 2)
 #define LOG_TAP_HOLD (2 << 2)
+#define LOG_FULL_DBL (3 << 2)
 
 void _td_tap_or_hold_each(tap_dance_state_t *state, void *user_data) {
     _debug_td_state(state, LOG_APP_SW | LOG_PRESS);
@@ -75,27 +76,69 @@ void _td_n_tap_or_hold_finished(tap_dance_state_t *state, void *user_data) {
     }
 }
 
+void _td_full_dbl_finished(tap_dance_state_t *state, void *user_data) {
+    _debug_td_state(state, LOG_FULL_DBL | LOG_FINISH);
+    td_n_tap_hold_state_t *td_state = user_data;
+
+    if (state->interrupted) {
+        return;
+    }
+
+    if (state->pressed) {
+        // this is a hold
+        if (state->count == 1 && td_state->hold_code) {
+            tap_code16(td_state->hold_code);
+        } else if (state->count == 2 && td_state->dbl_hold_code) {
+            tap_code16(td_state->dbl_hold_code);
+        }
+    } else {
+        // this is a tap
+        if (state->count == 1 && td_state->tap_code != KC_NO) {
+            tap_code16(td_state->tap_code);
+        } else if (state->count == 2 && td_state->dbl_tap_code != KC_NO) {
+            tap_code16(td_state->dbl_tap_code);
+        }
+    }
+}
+
 #ifdef TAP_DANCE_DEBUG
 void _debug_td_state(tap_dance_state_t *state, uint8_t what) {
     char *component;
     switch (what & ~3) {
-        case LOG_APP_SW: component = "app sw"; break;
-        case LOG_TAP_HOLD: component = "tap/hold"; break;
-        default: component = "?"; break;
+        case LOG_APP_SW:
+            component = "app sw";
+            break;
+        case LOG_TAP_HOLD:
+            component = "tap/hold";
+            break;
+        case LOG_FULL_DBL:
+            component = "f-dbl";
+            break;
+        default:
+            component = "?";
+            break;
     };
 
     char *cb;
     switch (what & 3) {
-        case LOG_PRESS: cb = "PRESS"; break;
-        case LOG_RELEASE: cb = "RELEASE"; break;
-        case LOG_FINISH: cb = "FINISH"; break;
-        case LOG_RESET: cb = "RESET"; break;
-        default: cb = "?"; break;
+        case LOG_PRESS:
+            cb = "PRESS";
+            break;
+        case LOG_RELEASE:
+            cb = "RELEASE";
+            break;
+        case LOG_FINISH:
+            cb = "FINISH";
+            break;
+        case LOG_RESET:
+            cb = "RESET";
+            break;
+        default:
+            cb = "?";
+            break;
     };
 
-    uprintf("     %05u [%s %s] %s cnt=%d%s%s\n",
-            timer_read(),
-            component, cb, state->pressed ? "PRESS" : "REL", state->count, state->finished ? " finished" : "", state->interrupted ? " interrupted" : "");
+    uprintf("     %05u [%s %s] %s cnt=%d%s%s\n", timer_read(), component, cb, state->pressed ? "PRESS" : "REL", state->count, state->finished ? " finished" : "", state->interrupted ? " interrupted" : "");
 }
 #else
 void _debug_td_state(tap_dance_state_t *state, uint8_t what) {}

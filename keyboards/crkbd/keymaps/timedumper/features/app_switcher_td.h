@@ -9,6 +9,7 @@ DECL(_td_tap_or_hold_finished)
 DECL(_td_tap_or_hold_reset)
 DECL(_td_n_tap_or_hold_each_release)
 DECL(_td_n_tap_or_hold_finished)
+DECL(_td_full_dbl_finished)
 #undef DECL
 
 typedef struct {
@@ -31,7 +32,9 @@ typedef struct {
 
 typedef struct {
     uint16_t tap_code;
+    uint16_t dbl_tap_code;
     uint16_t hold_code;
+    uint16_t dbl_hold_code;
 } td_n_tap_hold_state_t;
 
 #define TAP_DANCE_N_TAP_HOLD(tap_kc, hold_kc) (\
@@ -42,5 +45,17 @@ typedef struct {
             &(td_n_tap_hold_state_t){ \
                 .tap_code = tap_kc, \
                 .hold_code = hold_kc, \
+            }, \
+    })
+
+#define TAP_DANCE_FULL_DOUBLE(tap_kc, dbl_tap_kc, hold_kc, dbl_hold_kc) (\
+    (tap_dance_action_t){ \
+        .fn.on_dance_finished = _td_full_dbl_finished, \
+        .user_data = \
+            &(td_n_tap_hold_state_t){ \
+                .tap_code = tap_kc, \
+                .hold_code = hold_kc, \
+                .dbl_hold_code = dbl_hold_kc, \
+                .dbl_tap_code = dbl_tap_kc, \
             }, \
     })

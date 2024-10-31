@@ -37,7 +37,8 @@ enum tap_dances {
     TD_APP_SWITCH,
     TD_SAVE_OR_OPEN,
     TD_NXT_WND_OR_QUIT,
-    TD_RFRSH_OR_HARD_R
+    TD_RFRSH_OR_HARD_R,
+    TD_FIND_OR_REPLACE
 };
 
 // MARK: keycode aliases
@@ -52,6 +53,7 @@ enum tap_dances {
 #define CK_SAVE_OR_OPEN TD(TD_SAVE_OR_OPEN)
 #define CK_NXT_WND_OR_QUIT TD(TD_NXT_WND_OR_QUIT)
 #define CK_RFRSH_OR_HARD_R TD(TD_RFRSH_OR_HARD_R)
+#define CK_FIND_OR_REPLACE TD(TD_FIND_OR_REPLACE)
 
 // QMK keycodes
 #define TAP_TERM_PRN QK_DYNAMIC_TAPPING_TERM_PRINT
@@ -113,7 +115,7 @@ const uint16_t PROGMEM CMB_KEYS_S_D_F[] = {KC_S, KC_D, BASE_F, COMBO_END};
 combo_t key_combos[] = {
     // cursor left/right (for single handed use, like fast forwarding youtube)
     COMBO(CMB_KEYS_W_E, KC_LEFT),
-    COMBO(CMB_KEYS_E_R, KC_LEFT),
+    COMBO(CMB_KEYS_E_R, KC_RIGHT),
     // expose all windows
     COMBO(CMB_KEYS_F_W, LCTL(KC_UP)),
     // expose only current app's windows
@@ -294,7 +296,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  //.-----------------------------------------------------------------------------------------------------------------------.
     XXXXXXX           , CK_NXT_WND_OR_QUIT, CK_APP_SWITCHER    , XXXXXXX           , CK_RFRSH_OR_HARD_R, G(KC_T)           ,
  //|------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
-    KC_ESCAPE         , XXXXXXX           , CK_SAVE_OR_OPEN    , QK_REPEAT_KEY     , XXXXXXX           , QK_LEADER         ,
+    KC_ESCAPE         , XXXXXXX           , CK_SAVE_OR_OPEN    , QK_REPEAT_KEY     , CK_FIND_OR_REPLACE, QK_LEADER         ,
  //|------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
     KC_LSFT           , G(KC_Z)           , G(KC_X)            , G(KC_C)           , G(KC_V)           , XXXXXXX           ,
  //'------------------+-------------------+--------------------+-------------------+-------------------+-------------------|
@@ -414,6 +416,7 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD_SAVE_OR_OPEN] = TAP_DANCE_N_TAP_HOLD(G(KC_S), G(KC_O)),
     [TD_NXT_WND_OR_QUIT] = TAP_DANCE_N_TAP_HOLD(G(KC_GRAVE), G(KC_Q)),
     [TD_RFRSH_OR_HARD_R] = TAP_DANCE_N_TAP_HOLD(G(KC_R), G(S(KC_R))),
+    [TD_FIND_OR_REPLACE] = TAP_DANCE_FULL_DOUBLE(G(KC_F), G(A(KC_F)), G(S(KC_F)), G(A(S(KC_F))))
 };
 
 // MARK: callbacks
